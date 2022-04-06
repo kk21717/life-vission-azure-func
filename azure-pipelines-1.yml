@@ -3,47 +3,56 @@ trigger:
 
 variables:
   # Azure service connection established during pipeline creation
-  azureSubscription: <Name of your Azure subscription>
+  subscriptionName: <Name of your Azure subscription>
   appName: <Name of the function app>
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'ubuntu-latest'
 
 steps:
-- script: |
-    dotnet restore
-    dotnet build --configuration Release
 
 - task: DotNetCoreCLI@2
+  displayName: "Restore Packages"
   inputs:
-    command: publish
-    arguments: '--configuration Release --output publish_output'
-    projects: '*.csproj'
-    publishWebProjects: false
-    modifyOutputPath: false
-    zipAfterPublish: false
+    command: 'restore'
+    projects: '**/*.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: "Build"
+  inputs:
+    command: 'build'
+    projects: '**/*.csproj'
+    arguments: '--output $(Build.BinariesDirectory)/publish_output --configuration Release'
+
+- task: DotNetCoreCLI@2
+  displayName: "Unit Test"
+  inputs:
+    command: 'test'
+    projects: '**/TimeEntryManager.Tests.csproj'
 
 - task: ArchiveFiles@2
-  displayName: "Archive files"
+  displayName: "Archive Files"
   inputs:
-    rootFolderOrFile: "$(System.DefaultWorkingDirectory)/publish_output"
+    rootFolderOrFile: '$(Build.BinariesDirectory)/publish_output'
     includeRootFolder: false
-    archiveFile: "$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip"
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    replaceExistingArchive: true
 
 - task: PublishBuildArtifacts@1
-  displayName: "Drop Archive files"
+  displayName: "Publish"
   inputs:
-    PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip'
-    artifactName: 'drop'
-
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
 
 - task: AzureFunctionApp@1 
   displayName: "Deploy"
   inputs:
-    azureSubscription: <Azure service connection>
+    azureSubscription: $(subscriptionName)
     appType: functionAppLinux 
     appName: $(appName)
-    package: $(System.DefaultWorkingDirectory)/**/*.zip
+    package: $(Build.ArtifactStagingDirectory)/**/*.zip
     
