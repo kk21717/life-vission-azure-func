@@ -6,6 +6,13 @@
 trigger:
 - master
 
+variables:
+  # Azure service connection established during pipeline creation
+  azureSubscription: <Name of your Azure subscription>
+  appName: <Name of the function app>
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
 pool:
   vmImage: ubuntu-latest
 
@@ -30,9 +37,11 @@ steps:
     ArtifactName: 'drop'
     publishLocation: 'Container'
 
-- task: AzureFunctionApp@1
+
+- task: AzureFunctionApp@1 
   inputs:
-    appType: 'functionApp'
-    appName: 
-    package: '$(System.DefaultWorkingDirectory)/**/*.zip'
-    deploymentMethod: 'auto'
+    azureSubscription: <Azure service connection>
+    appType: functionAppLinux
+    appName: $(appName)
+    package: $(Build.ArtifactStagingDirectory)/**/*.zip
+    
