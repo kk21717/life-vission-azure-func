@@ -22,7 +22,7 @@ steps:
   displayName: "Build"
   inputs:
     command: 'build'
-    projects: '**/*.csproj'
+    projects: '**/TimeEntryManager.csproj'
     arguments: '--output $(Build.BinariesDirectory)/publish_output --configuration Release'
 
 - task: DotNetCoreCLI@2
