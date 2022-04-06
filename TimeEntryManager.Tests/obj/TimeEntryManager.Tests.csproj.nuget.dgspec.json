@@ -1,0 +1,154 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Karami\\other\\LifeVission\\TimeEntryManager\\TimeEntryManager.Tests\\TimeEntryManager.Tests.csproj": {}
+  },
+  "projects": {
+    "C:\\Karami\\other\\LifeVission\\TimeEntryManager\\TimeEntryManager.Tests\\TimeEntryManager.Tests.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Karami\\other\\LifeVission\\TimeEntryManager\\TimeEntryManager.Tests\\TimeEntryManager.Tests.csproj",
+        "projectName": "TimeEntryManager.Tests",
+        "projectPath": "C:\\Karami\\other\\LifeVission\\TimeEntryManager\\TimeEntryManager.Tests\\TimeEntryManager.Tests.csproj",
+        "packagesPath": "C:\\Users\\k.karami\\.nuget\\packages\\",
+        "outputPath": "C:\\Karami\\other\\LifeVission\\TimeEntryManager\\TimeEntryManager.Tests\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\k.karami\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "http://192.168.72.17:8092/nuget": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {
+              "C:\\Karami\\other\\LifeVission\\TimeEntryManager\\TimeEntryManager\\TimeEntryManager.csproj": {
+                "projectPath": "C:\\Karami\\other\\LifeVission\\TimeEntryManager\\TimeEntryManager\\TimeEntryManager.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "Microsoft.NET.Test.Sdk": {
+              "target": "Package",
+              "version": "[16.11.0, )"
+            },
+            "NUnit": {
+              "target": "Package",
+              "version": "[3.13.2, )"
+            },
+            "NUnit3TestAdapter": {
+              "target": "Package",
+              "version": "[4.0.0, )"
+            },
+            "coverlet.collector": {
+              "target": "Package",
+              "version": "[3.1.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.101\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Karami\\other\\LifeVission\\TimeEntryManager\\TimeEntryManager\\TimeEntryManager.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Karami\\other\\LifeVission\\TimeEntryManager\\TimeEntryManager\\TimeEntryManager.csproj",
+        "projectName": "TimeEntryManager",
+        "projectPath": "C:\\Karami\\other\\LifeVission\\TimeEntryManager\\TimeEntryManager\\TimeEntryManager.csproj",
+        "packagesPath": "C:\\Users\\k.karami\\.nuget\\packages\\",
+        "outputPath": "C:\\Karami\\other\\LifeVission\\TimeEntryManager\\TimeEntryManager\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\k.karami\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "http://192.168.72.17:8092/nuget": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "Microsoft.NET.Sdk.Functions": {
+              "target": "Package",
+              "version": "[4.0.1, )"
+            },
+            "Microsoft.PowerPlatform.Dataverse.Client": {
+              "target": "Package",
+              "version": "[0.6.1, )"
+            },
+            "Newtonsoft.Json.Schema": {
+              "target": "Package",
+              "version": "[3.0.14, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.101\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

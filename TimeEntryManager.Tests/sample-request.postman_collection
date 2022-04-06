@@ -1,0 +1,38 @@
+{
+	"info": {
+		"_postman_id": "eb2689a5-af18-498d-abfb-7429c73570c2",
+		"name": "Sample Postman Request(s)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "http://localhost:7071/api/Function1",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"StartOn\" : \"2022-01-02\",\r\n    \"EndOn\" : \"2022-01-06\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:7071/api/TimeEntryFunction",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"api",
+						"TimeEntryFunction"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
