@@ -1,47 +1,57 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
 - master
 
 variables:
-  # Azure service connection established during pipeline creation
-  azureSubscription: <Name of your Azure subscription>
+  subscriptionName: <Name of your Azure subscription>
   appName: <Name of the function app>
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: 'ubuntu-latest'
 
 steps:
+
 - task: DotNetCoreCLI@2
+  displayName: "Restore Packages"
+  inputs:
+    command: 'restore'
+    projects: '**/*.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: "Build"
   inputs:
     command: 'build'
     projects: '**/*.csproj'
-    arguments: '--output $(Build.Binaries.Directory)/publish_output'
+    arguments: '--output $(Build.BinariesDirectory)/publish_output --configuration Release'
+
+- task: DotNetCoreCLI@2
+  displayName: "Unit Test"
+  inputs:
+    command: 'test'
+    projects: '**/TimeEntryManager.Tests.csproj'
 
 - task: ArchiveFiles@2
+  displayName: "Archive Files"
   inputs:
-    rootFolderOrFile: '$(Build.Binaries.Directory)/publish_output'
+    rootFolderOrFile: '$(Build.BinariesDirectory)/publish_output'
     includeRootFolder: false
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
     replaceExistingArchive: true
-    
+
 - task: PublishBuildArtifacts@1
+  displayName: "Publish"
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'drop'
     publishLocation: 'Container'
 
-
 - task: AzureFunctionApp@1 
+  displayName: "Deploy"
   inputs:
-    azureSubscription: <Azure service connection>
-    appType: functionAppLinux
+    azureSubscription: $(subscriptionName)
+    appType: functionAppLinux 
     appName: $(appName)
     package: $(Build.ArtifactStagingDirectory)/**/*.zip
     
