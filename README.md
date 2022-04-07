@@ -1,4 +1,4 @@
-﻿Introduction
+Introduction
 
 	'Rent Ready Technical Assessment' is the title of an assignment introduced by Life Vission Recruitment Agency. It is based on performing simple crud operations on a Dynamic 365 dataverse. It consists tow tasks, task 1 which is setting up the dataverse environment, and the second is to implement	an azure function to receive a date range as payload and insert every date in between into a dataverse table named 'Time Entry'. Every single day in the range should be inserted in dataverse	leading to a time entry row having the 'start' and 'end' fields with the same ( value of that day ).
 

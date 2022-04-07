@@ -15,7 +15,12 @@
       "ProjectGuid": "0cd2d196-f632-44e4-963e-cd620f0c5c8c",
       "DisplayName": "TimeEntryManager.Tests",
       "ColorIndex": 1
+    },
+    "b707973c-6640-431f-8d68-3ed064ecc691": {
+      "ProjectGuid": "b707973c-6640-431f-8d68-3ed064ecc691",
+      "DisplayName": "Solution Items",
+      "ColorIndex": 2
     }
   },
-  "NextColorIndex": 2
+  "NextColorIndex": 3
 }
