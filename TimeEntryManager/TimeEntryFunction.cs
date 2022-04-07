@@ -10,6 +10,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.PowerPlatform.Dataverse.Client;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Messages;
+using Microsoft.Xrm.Sdk.Metadata;
 using Microsoft.Xrm.Sdk.Query;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
@@ -19,16 +21,15 @@ namespace TimeEntryManager
     public class TimeEntryFunction
     {
         private readonly ILogger<TimeEntryFunction> _logger;
-        private readonly ExecutionContext _context;
+        private ExecutionContext _context;
         private ServiceClient _service;
 
         #region constants
-        public static readonly string DataverseTableName = "crf72_timeentry";
-        public static readonly string DataverseIdFieldName = "crf72_timeentryid";
-        public static readonly string DataversePrimaryFieldName = "crf72_title";
-        public static readonly string DataverseStartFieldName = "crf72_start";
-        public static readonly string DataverseEndFieldName = "crf72_end";
-        
+        public static readonly string DataverseTableName = "kk_timeentry";
+        public static readonly string DataverseIdFieldName = "kk_timeentryid";
+        public static readonly string DataversePrimaryFieldName = "kk_title";
+        public static readonly string DataverseStartFieldName = "kk_start";
+        public static readonly string DataverseEndFieldName = "kk_end";
 
         public static readonly string DataverseConnectionEnvKey = "MyDataverseConnection";
         public static readonly string DataverseDefaultConnection = "AuthType=OAuth;Username = KamranKarami@kk365env.onmicrosoft.com;Password = SimplePass123;Url = https://orgb66fe12c.crm11.dynamics.com;";
@@ -53,10 +54,9 @@ namespace TimeEntryManager
              }";
         #endregion
 
-        public TimeEntryFunction(ILogger<TimeEntryFunction> log,ExecutionContext context)
+        public TimeEntryFunction(ILogger<TimeEntryFunction> log)
         {
             _logger = log;
-            _context = context;
         }
 
 
@@ -64,10 +64,15 @@ namespace TimeEntryManager
         /// Azure function that gets a date range and insert all dates in range into dataverse
         /// </summary>
         /// <param name="req">payload json that contains StartOn and EndOn based on the given Schema</param>
+        ///  <param name="context">payload json that contains StartOn and EndOn based on the given Schema</param>
         /// <returns>returns an ObjectResult with standard http response codes</returns>
+        
         [FunctionName("TimeEntryFunction")]
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
+            ExecutionContext context)
         {
+            _context = context;
+
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var payload = GetPayload(requestBody, out var isPayloadValid);
             if (!isPayloadValid)
@@ -120,6 +125,8 @@ namespace TimeEntryManager
         private string PerformOperation(TimeEntryFunctionPayload payload, out bool isSucceed)
         {
             _service = new ServiceClient(GetConnectionString());
+
+            CreateTimeEntryEntityIfNoteExists();
             
             if (_service is { IsReady: true })
             {
@@ -143,6 +150,83 @@ namespace TimeEntryManager
             Console.WriteLine($"Service is not available: {_service.LastError}");
             isSucceed = false;
             return null;
+
+        }
+
+        /// <summary>
+        /// check if TimeEntry table exists in dataverse, and create the table if it does not exist
+        /// </summary>
+        private void CreateTimeEntryEntityIfNoteExists()
+        {
+            var tableExists = true;
+            try
+            { 
+                _service.Execute(new RetrieveEntityRequest { EntityFilters = EntityFilters.Entity, LogicalName = DataverseTableName });
+            }
+            catch
+            {
+                tableExists = false;
+            }
+
+            if (tableExists)
+                return;
+
+            var requester = new CreateEntityRequest
+            {
+                //Define the entity
+                Entity = new EntityMetadata
+                {
+                    SchemaName = DataverseTableName,
+                    DisplayName = new Label("Time Entry", 1033),
+                    DisplayCollectionName = new Label("Time Entries", 1033),
+                    Description = new Label("An entity to store information about time entries", 1033),
+                    OwnershipType = OwnershipTypes.UserOwned,
+                    IsActivity = false
+                },
+
+                // Define the primary attribute for the entity
+                PrimaryAttribute = new StringAttributeMetadata
+                {
+                    SchemaName = DataversePrimaryFieldName,
+                    RequiredLevel = new AttributeRequiredLevelManagedProperty(AttributeRequiredLevel.None),
+                    MaxLength = 100,
+                    FormatName = StringFormatName.Text,
+                    DisplayName = new Label("Title", 1033),
+                    Description = new Label("The primary attribute for the entity.", 1033)
+                }
+            };
+            
+            _service.Execute(requester);
+
+            var createStartColRequest = new CreateAttributeRequest
+            {
+                EntityName = DataverseTableName,
+                Attribute = new DateTimeAttributeMetadata
+                {
+                    SchemaName = DataverseStartFieldName,
+                    RequiredLevel = new AttributeRequiredLevelManagedProperty(AttributeRequiredLevel.ApplicationRequired),
+                    Format = DateTimeFormat.DateOnly,
+                    DisplayName = new Label("Start Date", 1033),
+                    Description = new Label("The start date", 1033)
+                }
+            };
+
+            _service.Execute(createStartColRequest);
+
+            var createEndColRequest = new CreateAttributeRequest
+            {
+                EntityName = DataverseTableName,
+                Attribute = new DateTimeAttributeMetadata
+                {
+                    SchemaName = DataverseEndFieldName,
+                    RequiredLevel = new AttributeRequiredLevelManagedProperty(AttributeRequiredLevel.ApplicationRequired),
+                    Format = DateTimeFormat.DateOnly,
+                    DisplayName = new Label("End Date", 1033),
+                    Description = new Label("The end date", 1033)
+                }
+            };
+
+            _service.Execute(createEndColRequest);
 
         }
 
@@ -198,7 +282,7 @@ namespace TimeEntryManager
                     return conEnv;
 
                 //try reading from local config, if not read from default constant(hard coded)
-                var conConfig = GetConfig(_context)?[DataverseConnectionEnvKey];
+                var conConfig = GetConfig()?[DataverseConnectionEnvKey];
                 return !string.IsNullOrEmpty(conConfig) ? conConfig : DataverseDefaultConnection;
 
             }
@@ -213,14 +297,13 @@ namespace TimeEntryManager
         /// <summary>
         /// reads config settings from local.settings.json
         /// </summary>
-        /// <param name="context"></param>
         /// <returns></returns>
-        private IConfigurationRoot GetConfig(ExecutionContext context)
+        private IConfigurationRoot GetConfig()
         {
             try
             {
                 return new ConfigurationBuilder()
-                    .SetBasePath(context?.FunctionAppDirectory)
+                    .SetBasePath(_context?.FunctionAppDirectory)
                     .AddJsonFile("local.settings.json", true, true)
                     .AddEnvironmentVariables()
                     .Build();

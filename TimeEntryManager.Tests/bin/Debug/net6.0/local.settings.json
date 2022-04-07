@@ -5,4 +5,5 @@
     "FUNCTIONS_WORKER_RUNTIME": "dotnet"
   },
   "MyDataverseConnection": "AuthType=OAuth;Username = KamranKarami@kk365env.onmicrosoft.com;Password = SimplePass123;Url = https://orgb66fe12c.crm11.dynamics.com;"
+  
 }

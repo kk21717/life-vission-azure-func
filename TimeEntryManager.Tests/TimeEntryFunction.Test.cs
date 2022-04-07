@@ -9,18 +9,20 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using Microsoft.Xrm.Sdk.Messages;
+using Microsoft.Xrm.Sdk.Metadata;
 
 namespace TimeEntryManager.Tests
 {
     public class Tests
     {
-        private readonly TimeEntryFunction _func;
-        private readonly ServiceClient _service;
+        private readonly TimeEntryFunction _func = new(null); 
+        private readonly ServiceClient _service = new(TimeEntryFunction.DataverseDefaultConnection);
 
-        public Tests()
+        [SetUp]
+        public void Setup()
         {
-            _service = new ServiceClient(TimeEntryFunction.DataverseDefaultConnection);
-            _func = new TimeEntryFunction(null,null);
+            CreateTimeEntryEntityIfNoteExists();
         }
 
         [Test]
@@ -28,7 +30,7 @@ namespace TimeEntryManager.Tests
         {
             const string payload = "Some not-json data!";
             var req = GetHttpRequestFor(payload);
-            var res = (ObjectResult)_func.Run(req).Result;
+            var res = (ObjectResult)_func.Run(req,null).Result;
             Assert.AreEqual(StatusCodes.Status400BadRequest, res.StatusCode);
         }
 
@@ -37,7 +39,7 @@ namespace TimeEntryManager.Tests
         {
             dynamic payload = new { StartOn = "bad data type", EndOn = "2022-04-06 17:27:00.000" };
             var req = GetHttpRequestFor(payload);
-            var res = (ObjectResult)_func.Run(req).Result;
+            var res = (ObjectResult)_func.Run(req,null).Result;
             Assert.AreEqual(StatusCodes.Status400BadRequest, res.StatusCode);
         }
 
@@ -49,7 +51,7 @@ namespace TimeEntryManager.Tests
                 StartOn = new DateOnly(2022, 01, 03)
             };
             var req = GetHttpRequestFor(payload);
-            var res = (ObjectResult)_func.Run(req).Result;
+            var res = (ObjectResult)_func.Run(req,null).Result;
             Assert.AreEqual(StatusCodes.Status400BadRequest, res.StatusCode);
         }
 
@@ -62,7 +64,7 @@ namespace TimeEntryManager.Tests
                 EndOn = new DateOnly(2022,01,02)
             };
             var req = GetHttpRequestFor(payload);
-            var res = (ObjectResult)_func.Run(req).Result;
+            var res = (ObjectResult)_func.Run(req,null).Result;
             Assert.AreEqual(StatusCodes.Status400BadRequest, res.StatusCode);
         }
 
@@ -94,7 +96,7 @@ namespace TimeEntryManager.Tests
                 EndOn = endDate
             };
             var req = GetHttpRequestFor(payload.ToJson());
-            var res = (ObjectResult)_func.Run(req).Result;
+            var res = (ObjectResult)_func.Run(req,null).Result;
             #endregion
 
             #region Assertions
@@ -143,7 +145,7 @@ namespace TimeEntryManager.Tests
             #region perform operation
             var payload = new TimeEntryFunctionPayload(startDate, endDate);
             var req = GetHttpRequestFor(payload.ToJson());
-            var res = (ObjectResult)_func.Run(req).Result;
+            var res = (ObjectResult)_func.Run(req,null).Result;
             #endregion
 
             #region Assertions
@@ -220,7 +222,7 @@ namespace TimeEntryManager.Tests
             #region perform operation
             var payload = new TimeEntryFunctionPayload(startDate, endDate);
             var req = GetHttpRequestFor(payload.ToJson());
-            var res = (ObjectResult)_func.Run(req).Result;
+            var res = (ObjectResult)_func.Run(req,null).Result;
             #endregion
 
             #region Assertions
@@ -255,6 +257,80 @@ namespace TimeEntryManager.Tests
             return httpContext.Request;
         }
 
-        
+        /// <summary>
+        /// check if TimeEntry table exists in dataverse, and create the table if it does not exist
+        /// </summary>
+        private void CreateTimeEntryEntityIfNoteExists()
+        {
+            var tableExists = true;
+            try
+            {
+                _service.Execute(new RetrieveEntityRequest { EntityFilters = EntityFilters.Entity, LogicalName = TimeEntryFunction.DataverseTableName });
+            }
+            catch
+            {
+                tableExists = false;
+            }
+
+            if (tableExists)
+                return;
+
+            var requester = new CreateEntityRequest
+            {
+                Entity = new EntityMetadata
+                {
+                    SchemaName = TimeEntryFunction.DataverseTableName,
+                    DisplayName = new Label("Time Entry", 1033),
+                    DisplayCollectionName = new Label("Time Entries", 1033),
+                    Description = new Label("An entity to store information about time entries", 1033),
+                    OwnershipType = OwnershipTypes.UserOwned,
+                    IsActivity = false
+                },
+
+                PrimaryAttribute = new StringAttributeMetadata
+                {
+                    SchemaName = TimeEntryFunction.DataversePrimaryFieldName,
+                    RequiredLevel = new AttributeRequiredLevelManagedProperty(AttributeRequiredLevel.None),
+                    MaxLength = 100,
+                    FormatName = StringFormatName.Text,
+                    DisplayName = new Label("Title", 1033),
+                    Description = new Label("The primary attribute for the entity.", 1033)
+                }
+            };
+
+            _service.Execute(requester);
+
+            var createStartColRequest = new CreateAttributeRequest
+            {
+                EntityName = TimeEntryFunction.DataverseTableName,
+                Attribute = new DateTimeAttributeMetadata
+                {
+                    SchemaName = TimeEntryFunction.DataverseStartFieldName,
+                    RequiredLevel = new AttributeRequiredLevelManagedProperty(AttributeRequiredLevel.ApplicationRequired),
+                    Format = DateTimeFormat.DateOnly,
+                    DisplayName = new Label("Start Date", 1033),
+                    Description = new Label("The start date", 1033)
+                }
+            };
+
+            _service.Execute(createStartColRequest);
+
+            var createEndColRequest = new CreateAttributeRequest
+            {
+                EntityName = TimeEntryFunction.DataverseTableName,
+                Attribute = new DateTimeAttributeMetadata
+                {
+                    SchemaName = TimeEntryFunction.DataverseEndFieldName,
+                    RequiredLevel = new AttributeRequiredLevelManagedProperty(AttributeRequiredLevel.ApplicationRequired),
+                    Format = DateTimeFormat.DateOnly,
+                    DisplayName = new Label("End Date", 1033),
+                    Description = new Label("The end date", 1033)
+                }
+            };
+
+            _service.Execute(createEndColRequest);
+
+        }
+
     }
 }
