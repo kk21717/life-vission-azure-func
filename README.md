@@ -1,9 +1,9 @@
-#Introduction
+# Introduction
 
 Rent Ready Technical Assessment is the title of an assignment introduced by Life Vission Recruitment Agency. It is based on performing simple crud operations on a Dynamic 365 dataverse. It consists tow tasks, task 1 which is setting up the dataverse environment, and the second is to implement	an azure function to receive a date range as payload and insert every date in between into a dataverse table named 'Time Entry'. Every single day in the range should be inserted in dataverse	leading to a time entry row having the 'start' and 'end' fields with the same ( value of that day ).
 
 
-#Assumptions
+# Assumptions
 
 1. The azure function uses a **HTTP trigger**
 
@@ -15,7 +15,7 @@ Rent Ready Technical Assessment is the title of an assignment introduced by Life
 3. The implementation is not developed/tuned for efficient performance in scaled environments
 
 
-#Build, test, and develop locally
+# Build, test, and develop locally
 
 1. Clone the repo to your local development system
 
@@ -35,7 +35,7 @@ Rent Ready Technical Assessment is the title of an assignment introduced by Life
 5. To **manually test** using postman: import *TimeEntryManager.Tests/sample-request.postman_collection.json* and send a post request to **http://localhost:7071/api/TimeEntryFunction**
 
 
-#Deployment to Azure cloud
+# Deployment to Azure cloud
 
 1. Set your dataverse connection string into the key **'MyDataverseConnection'** in **Environment Variables**
 
